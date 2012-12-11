@@ -184,6 +184,10 @@ public class JcloudsUtil {
         properties.setProperty(Constants.PROPERTY_CREDENTIAL, (String)conf.get("credential")); unusedConf.remove("credential");
         properties.setProperty(Constants.PROPERTY_TRUST_ALL_CERTS, Boolean.toString(true));
         properties.setProperty(Constants.PROPERTY_RELAX_HOSTNAME, Boolean.toString(true));
+
+        // required for Cinderella to prevent timeouts during RunInstances
+        properties.setProperty(Constants.PROPERTY_SO_TIMEOUT, "0");
+        properties.setProperty(Constants.PROPERTY_TIMEOUTS_PREFIX + "InstanceClient.runInstancesInRegion", "4800000");
                 
         // Enable aws-ec2 lazy image fetching, if given a specific imageId; otherwise customize for specific owners; or all as a last resort
         // See https://issues.apache.org/jira/browse/WHIRR-416
