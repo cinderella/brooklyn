@@ -10,6 +10,7 @@ import java.util.NoSuchElementException;
 import java.util.ServiceLoader;
 import java.util.Set;
 
+import brooklyn.config.StringConfigMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -113,7 +114,8 @@ public class BasicLocationRegistry implements brooklyn.location.LocationRegistry
             // we need ability/format for persisting named locations, and better support for adding+saving via REST/GUI)
             int count = 0;
             String NAMED_LOCATION_PREFIX = "brooklyn.location.named.";
-            ConfigMap namedLocationProps = mgmt.getConfig().submap(ConfigPredicates.startingWith(NAMED_LOCATION_PREFIX));
+            StringConfigMap configMap = (mgmt == null) ? BrooklynProperties.Factory.newDefault() : mgmt.getConfig();
+            ConfigMap namedLocationProps = configMap.submap(ConfigPredicates.startingWith(NAMED_LOCATION_PREFIX));
             for (String k: namedLocationProps.asMapWithStringKeys().keySet()) {
                 String name = k.substring(NAMED_LOCATION_PREFIX.length());
                 // If has a dot, then is a sub-property of a named location (e.g. brooklyn.location.named.prod1.user=bob)
@@ -177,6 +179,11 @@ public class BasicLocationRegistry implements brooklyn.location.LocationRegistry
             LocationResolver resolver = getSpecResolver(spec);
 
             if (resolver instanceof RegistryLocationResolver) {
+
+                if (getDefinedLocations().isEmpty()) {
+                   findDefinedLocations();
+                }
+
                 return ((RegistryLocationResolver)resolver).newLocationFromString(locationFlags, spec, this);
             } else if (resolver != null) {
                 if (!locationFlags.isEmpty())
